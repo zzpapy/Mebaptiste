@@ -4,9 +4,17 @@
 
 {% block body %}
     <h1>Actualités</h1>
-    <ul>
+    <ul style="list-style: none; padding: 0;">
         {% for article in articles %}
-            <li><a href="{{ path('article_show', {slug: article.slug}) }}">{{ article.title }}</a></li>
+            <li style="margin-bottom: 30px; border-bottom: 1px solid #ddd; padding-bottom: 20px;">
+                {% if article.featuredImage %}
+                    <img src="{{ asset('uploads/articles/' ~ article.featuredImage) }}" alt="{{ article.title }}" style="max-width: 300px; border-radius: 8px; display: block; margin-bottom: 10px;">
+                {% endif %}
+                <a href="{{ path('article_show', {slug: article.slug}) }}" style="font-size: 1.3em; font-weight: bold;">{{ article.title }}</a>
+                {% if article.excerpt %}
+                    <p>{{ article.excerpt }}</p>
+                {% endif %}
+            </li>
         {% else %}
             <li>Aucun article publié pour le moment.</li>
         {% endfor %}

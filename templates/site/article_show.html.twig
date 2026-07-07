@@ -4,5 +4,10 @@
 
 {% block body %}
     <h1>{{ article.title }}</h1>
+
+    {% if article.featuredImage %}
+        <img src="{{ asset('uploads/articles/' ~ article.featuredImage) }}" alt="{{ article.title }}" style="max-width: 500px; border-radius: 8px; margin-bottom: 20px;">
+    {% endif %}
+
     <div>{{ article.content|raw }}</div>
 {% endblock %}

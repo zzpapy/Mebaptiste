@@ -10,6 +10,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\SlugField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
@@ -30,7 +31,11 @@ class ArticleCrudController extends AbstractCrudController
             SlugField::new('slug')->setTargetFieldName('title'),
             TextareaField::new('excerpt', 'Résumé')->hideOnIndex(),
             TextEditorField::new('content', 'Contenu'),
-            TextField::new('featuredImage', 'Image (chemin)')->hideOnIndex(),
+            ImageField::new('featuredImage', 'Image mise en avant')
+                ->setBasePath('uploads/articles')
+                ->setUploadDir('public/uploads/articles')
+                ->setUploadedFileNamePattern('[slug]-[timestamp].[extension]')
+                ->setRequired(false),
             TextField::new('metaDescription', 'Meta description (SEO)')->hideOnIndex(),
             DateTimeField::new('publishedAt', 'Date de publication'),
             BooleanField::new('isPublished', 'Publié'),
