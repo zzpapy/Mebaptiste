@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
         initialView: 'timeGridWeek',
         locale: 'fr',
         firstDay: 1,
+        allDayText: 'Journée',
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
