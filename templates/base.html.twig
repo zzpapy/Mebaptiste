@@ -34,7 +34,12 @@
     </main>
 
     <footer class="site-footer">
-        &copy; {{ "now"|date("Y") }} Maître Baptiste Lebrou - Avocat au barreau de Strasbourg
+        <p>&copy; {{ "now"|date("Y") }} Maître Baptiste Lebrou - Avocat au barreau de Strasbourg</p>
+        <nav class="footer-nav">
+            <a href="{{ path('page_show', {slug: 'mentions-legales'}) }}">Mentions légales</a>
+            <span class="footer-separator">·</span>
+            <a href="{{ path('page_show', {slug: 'politique-de-confidentialite'}) }}">Politique de confidentialité</a>
+        </nav>
     </footer>
 
     {% block importmap %}{{ importmap('app') }}{% endblock %}

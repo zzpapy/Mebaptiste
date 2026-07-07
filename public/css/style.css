@@ -106,6 +106,25 @@ footer.site-footer {
     font-size: 0.85rem;
 }
 
+footer.site-footer p {
+    margin: 0 0 8px 0;
+}
+
+.footer-nav a {
+    color: #aab1c2;
+    text-decoration: none;
+    font-size: 0.8rem;
+}
+
+.footer-nav a:hover {
+    color: var(--gold);
+}
+
+.footer-separator {
+    margin: 0 8px;
+    color: #6b7386;
+}
+
 @media (max-width: 640px) {
     .site-header .header-inner {
         flex-direction: column;
