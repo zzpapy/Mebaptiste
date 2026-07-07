@@ -29,6 +29,8 @@ class PageCrudController extends AbstractCrudController
             TextEditorField::new('content', 'Contenu'),
             TextField::new('metaDescription', 'Meta description (SEO)')->hideOnIndex(),
             BooleanField::new('isPublished', 'Publié'),
+            BooleanField::new('showInMenu', 'Afficher dans le menu')
+                ->setHelp('Ajoute automatiquement un lien vers cette page dans le menu de navigation du site.'),
         ];
     }
 

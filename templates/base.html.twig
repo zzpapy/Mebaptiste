@@ -19,6 +19,9 @@
                     <li><a href="{{ path('page_show', {slug: 'a-propos'}) }}">À propos</a></li>
                     <li><a href="{{ path('page_show', {slug: 'domaines-dexpertise'}) }}">Domaines d'expertise</a></li>
                     <li><a href="{{ path('article_list') }}">Actualités</a></li>
+                    {% for menuPage in menu_pages() %}
+                        <li><a href="{{ path('page_show', {slug: menuPage.slug}) }}">{{ menuPage.title }}</a></li>
+                    {% endfor %}
                     <li><a href="{{ path('booking_index') }}">Prendre rendez-vous</a></li>
                 </ul>
             </nav>

@@ -16,6 +16,22 @@ class PageRepository extends ServiceEntityRepository
         parent::__construct($registry, Page::class);
     }
 
+    /**
+     * @return Page[] Pages publiées à afficher automatiquement dans le menu de navigation
+     */
+    public function findMenuPages(): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.isPublished = :published')
+            ->andWhere('p.showInMenu = :showInMenu')
+            ->setParameter('published', true)
+            ->setParameter('showInMenu', true)
+            ->orderBy('p.title', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
     //    /**
     //     * @return Page[] Returns an array of Page objects
     //     */

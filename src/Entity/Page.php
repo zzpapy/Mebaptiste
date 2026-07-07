@@ -29,6 +29,9 @@ class Page
     #[ORM\Column]
     private ?bool $isPublished = null;
 
+    #[ORM\Column]
+    private bool $showInMenu = false;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -90,6 +93,18 @@ class Page
     public function setIsPublished(bool $isPublished): static
     {
         $this->isPublished = $isPublished;
+
+        return $this;
+    }
+
+    public function isShowInMenu(): bool
+    {
+        return $this->showInMenu;
+    }
+
+    public function setShowInMenu(bool $showInMenu): static
+    {
+        $this->showInMenu = $showInMenu;
 
         return $this;
     }
