@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Controller\Admin;
+
+use App\Entity\Page;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\SlugField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+
+class PageCrudController extends AbstractCrudController
+{
+    public static function getEntityFqcn(): string
+    {
+        return Page::class;
+    }
+
+    public function configureFields(string $pageName): iterable
+    {
+        return [
+            IdField::new('id')->hideOnForm(),
+            TextField::new('title', 'Titre'),
+            SlugField::new('slug')->setTargetFieldName('title'),
+            TextEditorField::new('content', 'Contenu'),
+            TextField::new('metaDescription', 'Meta description (SEO)')->hideOnIndex(),
+            BooleanField::new('isPublished', 'Publié'),
+        ];
+    }
+
+    public function configureActions(Actions $actions): Actions
+    {
+        return $actions
+            ->remove(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER)
+            ->remove(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE);
+    }
+}

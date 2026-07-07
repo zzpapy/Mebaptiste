@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block body %}
+    {% if page %}
+        <h1>{{ page.title }}</h1>
+        <div>{{ page.content|raw }}</div>
+    {% else %}
+        <h1>Bienvenue</h1>
+        <p>Aucune page "accueil" n'a encore été créée dans l'administration.</p>
+    {% endif %}
+{% endblock %}

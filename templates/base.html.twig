@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Maître Baptiste Lebrou{% endblock %} - Avocat à Strasbourg</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="{{ path('home') }}" class="site-title">
+                Baptiste Lebrou
+                <small>AVOCAT AU BARREAU DE STRASBOURG</small>
+            </a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="{{ path('home') }}">Accueil</a></li>
+                    <li><a href="{{ path('page_show', {slug: 'a-propos'}) }}">À propos</a></li>
+                    <li><a href="{{ path('page_show', {slug: 'domaines-dexpertise'}) }}">Domaines d'expertise</a></li>
+                    <li><a href="{{ path('article_list') }}">Actualités</a></li>
+                    <li><a href="{{ path('booking_index') }}">Prendre rendez-vous</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        {% block body %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        &copy; {{ "now"|date("Y") }} Maître Baptiste Lebrou - Avocat au barreau de Strasbourg
+    </footer>
+
+    {% block importmap %}{{ importmap('app') }}{% endblock %}
+</body>
+</html>

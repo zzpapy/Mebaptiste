@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Actualités{% endblock %}
+
+{% block body %}
+    <h1>Actualités</h1>
+    <ul>
+        {% for article in articles %}
+            <li><a href="{{ path('article_show', {slug: article.slug}) }}">{{ article.title }}</a></li>
+        {% else %}
+            <li>Aucun article publié pour le moment.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
