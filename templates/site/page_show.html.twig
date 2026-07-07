@@ -5,8 +5,8 @@
 {% block body %}
     <h1>{{ page.title }}</h1>
 
-    {% if page.slug == 'a-propos' %}
-        <img src="/lebrou_photo_face.jpg" alt="Maître Baptiste Lebrou" style="max-width: 300px; border-radius: 8px;">
+    {% if page.featuredImage %}
+        <img src="{{ asset('uploads/pages/' ~ page.featuredImage) }}" alt="{{ page.title }}" style="max-width: 300px; border-radius: 8px;">
     {% endif %}
 
     <div>{{ page.content|raw }}</div>

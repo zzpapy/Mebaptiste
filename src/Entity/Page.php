@@ -26,6 +26,9 @@ class Page
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $metaDescription = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $featuredImage = null;
+
     #[ORM\Column]
     private ?bool $isPublished = null;
 
@@ -81,6 +84,18 @@ class Page
     public function setMetaDescription(?string $metaDescription): static
     {
         $this->metaDescription = $metaDescription;
+
+        return $this;
+    }
+
+    public function getFeaturedImage(): ?string
+    {
+        return $this->featuredImage;
+    }
+
+    public function setFeaturedImage(?string $featuredImage): static
+    {
+        $this->featuredImage = $featuredImage;
 
         return $this;
     }

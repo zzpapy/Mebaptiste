@@ -9,6 +9,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\SlugField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -27,6 +28,12 @@ class PageCrudController extends AbstractCrudController
             TextField::new('title', 'Titre'),
             SlugField::new('slug')->setTargetFieldName('title'),
             TextEditorField::new('content', 'Contenu'),
+            ImageField::new('featuredImage', 'Image')
+                ->setBasePath('uploads/pages')
+                ->setUploadDir('public/uploads/pages')
+                ->setUploadedFileNamePattern('[slug]-[timestamp].[extension]')
+                ->setRequired(false)
+                ->hideOnIndex(),
             TextField::new('metaDescription', 'Meta description (SEO)')->hideOnIndex(),
             BooleanField::new('isPublished', 'Publié'),
             BooleanField::new('showInMenu', 'Afficher dans le menu')
