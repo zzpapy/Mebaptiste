@@ -116,3 +116,29 @@ footer.site-footer {
         gap: 16px;
     }
 }
+
+/* Page de prise de rendez-vous */
+.booking-page label {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-weight: bold;
+    color: var(--navy);
+    margin-right: 12px;
+}
+
+.booking-page #consultation-select {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.95rem;
+    color: var(--gray-text);
+    padding: 8px 12px;
+    border: 1px solid #c8cdd6;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.booking-page #consultation-select:hover,
+.booking-page #consultation-select:focus {
+    border-color: var(--gold);
+    outline: none;
+}
