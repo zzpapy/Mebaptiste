@@ -6,7 +6,7 @@
     <title>{% block title %}Maître Baptiste Lebrou{% endblock %} - Avocat à Strasbourg</title>
 
     <meta name="description" content="{% block meta_description %}Maître Baptiste Lebrou, avocat au barreau de Strasbourg. Conseil et défense en droit pénal. Prise de rendez-vous en ligne.{% endblock %}">
-    <link rel="canonical" href="{% block canonical_url %}{{ url(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}{% endblock %}">
+    <link rel="canonical" href="{% block canonical_url %}{{ app.request.uri }}{% endblock %}">
 
     <meta property="og:type" content="{% block og_type %}website{% endblock %}">
     <meta property="og:title" content="{% block og_title %}{{ block('title') }}{% endblock %}">
