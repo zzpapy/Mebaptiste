@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const stepCalendar = document.getElementById('booking-step-calendar');
-    const stepSuccess = document.getElementById('booking-step-success');
     const modalOverlay = document.getElementById('booking-modal-overlay');
     const modalClose = document.getElementById('booking-modal-close');
     const stepForm = document.getElementById('booking-step-form');
@@ -17,6 +16,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const selectedSlotEl = document.getElementById('booking-selected-slot');
     const bookingForm = document.getElementById('booking-form');
     const verifyForm = document.getElementById('booking-verify-form');
+    const successFlash = document.getElementById('booking-success-flash');
+    const successFlashClose = document.getElementById('booking-success-flash-close');
 
     let calendar = null;
     let selectedSlot = null;
@@ -46,10 +47,25 @@ document.addEventListener('DOMContentLoaded', function () {
         verifyForm.reset();
     }
 
+    function showSuccessFlash() {
+        successFlash.style.display = 'flex';
+    }
+
+    function hideSuccessFlash() {
+        successFlash.style.display = 'none';
+    }
+
     modalClose.addEventListener('click', closeModal);
     modalOverlay.addEventListener('click', function (event) {
         if (event.target === modalOverlay) {
             closeModal();
+        }
+    });
+
+    successFlashClose.addEventListener('click', hideSuccessFlash);
+    successFlash.addEventListener('click', function (event) {
+        if (event.target === successFlash) {
+            hideSuccessFlash();
         }
     });
 
@@ -60,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function initCalendarForConsultation(consultationName) {
-        stepSuccess.style.display = 'none';
+        hideSuccessFlash();
         closeModal();
 
         if (!consultationName) {
@@ -193,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 closeModal();
-                stepSuccess.style.display = 'block';
+                showSuccessFlash();
                 if (calendar) {
                     calendar.refetchEvents();
                 }
