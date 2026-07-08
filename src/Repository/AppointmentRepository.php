@@ -61,4 +61,22 @@ class AppointmentRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /**
+     * Retourne les X prochains rendez-vous actifs (non annulés), à partir de maintenant.
+     *
+     * @return Appointment[]
+     */
+    public function findUpcoming(int $limit = 5): array
+    {
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.status != :cancelled')
+            ->andWhere('a.startAt >= :now')
+            ->setParameter('cancelled', Appointment::STATUS_CANCELLED)
+            ->setParameter('now', new \DateTime())
+            ->orderBy('a.startAt', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Article;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
@@ -23,6 +24,19 @@ class ArticleCrudController extends AbstractCrudController
         return Article::class;
     }
 
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud
+            ->setEntityLabelInSingular('Article')
+            ->setEntityLabelInPlural('Articles');
+    }
+
+    public function configureAssets(Assets $assets): Assets
+    {
+        return $assets
+            ->addJsFile('admin_article_editor.js');
+    }
+
     public function configureFields(string $pageName): iterable
     {
         return [
@@ -30,7 +44,8 @@ class ArticleCrudController extends AbstractCrudController
             TextField::new('title', 'Titre'),
             SlugField::new('slug')->setTargetFieldName('title'),
             TextareaField::new('excerpt', 'Résumé')->hideOnIndex(),
-            TextEditorField::new('content', 'Contenu'),
+            TextEditorField::new('content', 'Contenu')
+                ->setHelp('Vous pouvez glisser-déposer une image directement dans le texte, à l\'endroit souhaité.'),
             ImageField::new('featuredImage', 'Image mise en avant')
                 ->setBasePath('uploads/articles')
                 ->setUploadDir('public/uploads/articles')
@@ -44,7 +59,15 @@ class ArticleCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
+        $viewOnSite = Action::new('viewOnSite', 'Voir la page publique', 'fas fa-external-link-alt')
+            ->linkToUrl(function (Article $article): string {
+                return $this->generateUrl('article_show', ['slug' => $article->getSlug()]);
+            })
+            ->setHtmlAttributes(['target' => '_blank']);
+
         return $actions
+            ->add(Crud::PAGE_INDEX, $viewOnSite)
+            ->add(Crud::PAGE_EDIT, $viewOnSite)
             ->remove(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER)
             ->remove(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE);
     }

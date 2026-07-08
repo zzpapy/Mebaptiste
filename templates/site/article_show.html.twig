@@ -9,5 +9,5 @@
         <img src="{{ asset('uploads/articles/' ~ article.featuredImage) }}" alt="{{ article.title }}" style="max-width: 500px; border-radius: 8px; margin-bottom: 20px;">
     {% endif %}
 
-    <div>{{ article.content|raw }}</div>
+    <div class="article-content">{{ article.content|raw }}</div>
 {% endblock %}

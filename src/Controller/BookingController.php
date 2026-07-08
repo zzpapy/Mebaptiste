@@ -6,6 +6,7 @@ use App\Entity\Appointment;
 use App\Entity\AppointmentVerification;
 use App\Repository\AppointmentRepository;
 use App\Repository\AppointmentVerificationRepository;
+use App\Repository\BlocageRepository;
 use App\Repository\ConsultationRepository;
 use App\Service\AppointmentConfirmationMailer;
 use App\Service\ConsultationResolver;
@@ -28,6 +29,7 @@ class BookingController extends AbstractController
         private readonly SlotGeneratorService $slotGeneratorService,
         private readonly VerificationCodeMailer $verificationCodeMailer,
         private readonly AppointmentConfirmationMailer $appointmentConfirmationMailer,
+        private readonly BlocageRepository $blocageRepository,
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -79,6 +81,46 @@ class BookingController extends AbstractController
             'title' => 'Disponible',
             'display' => 'block',
         ], $slots);
+
+        $blocages = $this->blocageRepository->findOverlapping($startDate, $endDate);
+
+        foreach ($blocages as $blocage) {
+            if ($blocage->isFullDay()) {
+                // FullCalendar traite 'end' comme exclusif pour les événements allDay,
+                // donc on ajoute un jour pour couvrir correctement la dernière journée.
+                $endExclusive = \DateTimeImmutable::createFromInterface($blocage->getEndDate())
+                    ->modify('+1 day');
+
+                $events[] = [
+                    'start' => $blocage->getStartDate()->format('Y-m-d'),
+                    'end' => $endExclusive->format('Y-m-d'),
+                    'title' => 'Indisponible',
+                    'allDay' => true,
+                    'color' => '#b03030',
+                    'display' => 'block',
+                ];
+
+                continue;
+            }
+
+            $currentDay = \DateTimeImmutable::createFromInterface($blocage->getStartDate());
+            $lastDay = \DateTimeImmutable::createFromInterface($blocage->getEndDate());
+
+            while ($currentDay <= $lastDay) {
+                $startTime = $blocage->getStartTime();
+                $endTime = $blocage->getEndTime();
+
+                $events[] = [
+                    'start' => $currentDay->setTime((int) $startTime->format('H'), (int) $startTime->format('i'))->format('Y-m-d\TH:i:s'),
+                    'end' => $currentDay->setTime((int) $endTime->format('H'), (int) $endTime->format('i'))->format('Y-m-d\TH:i:s'),
+                    'title' => 'Indisponible',
+                    'color' => '#b03030',
+                    'display' => 'block',
+                ];
+
+                $currentDay = $currentDay->modify('+1 day');
+            }
+        }
 
         return new JsonResponse($events);
     }

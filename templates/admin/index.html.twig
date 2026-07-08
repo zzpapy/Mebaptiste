@@ -53,7 +53,76 @@
     .dashboard-section-title:first-child {
         margin-top: 0;
     }
+    .upcoming-list {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .upcoming-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        text-decoration: none;
+        color: #1a2744;
+        transition: background 0.15s ease;
+    }
+    .upcoming-item:last-child {
+        border-bottom: none;
+    }
+    .upcoming-item:hover {
+        background: #faf8f5;
+        color: #1a2744;
+        text-decoration: none;
+    }
+    .upcoming-date {
+        display: flex;
+        flex-direction: column;
+        min-width: 130px;
+    }
+    .upcoming-date strong {
+        font-size: 14px;
+    }
+    .upcoming-date span {
+        font-size: 12px;
+        color: #888;
+    }
+    .upcoming-consultation {
+        flex: 1;
+        text-align: left;
+        padding-left: 20px;
+        font-weight: 600;
+    }
+    .upcoming-client {
+        font-size: 13px;
+        color: #666;
+        text-align: right;
+    }
+    .upcoming-empty {
+        padding: 24px 20px;
+        text-align: center;
+        color: #999;
+        font-size: 14px;
+    }
 </style>
+
+<div class="dashboard-section-title">Prochains rendez-vous</div>
+<div class="upcoming-list">
+    {% for appointment in upcomingAppointments %}
+        <a href="{{ ea_url().setController('App\\Controller\\Admin\\AppointmentCrudController').setAction('detail').setEntityId(appointment.id) }}" class="upcoming-item">
+            <div class="upcoming-date">
+                <strong>{{ appointment.startAt|date('d/m/Y') }}</strong>
+                <span>{{ appointment.startAt|date('H:i') }} - {{ appointment.endAt|date('H:i') }}</span>
+            </div>
+            <div class="upcoming-consultation">{{ appointment.consultation.name }}</div>
+            <div class="upcoming-client">{{ appointment.clientFirstName }} {{ appointment.clientLastName }}</div>
+        </a>
+    {% else %}
+        <div class="upcoming-empty">Aucun rendez-vous à venir.</div>
+    {% endfor %}
+</div>
 
 <div class="dashboard-section-title">Site</div>
 <div class="dashboard-grid">

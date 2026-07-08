@@ -5,10 +5,12 @@ namespace App\Service;
 use App\Entity\Appointment;
 use App\Entity\AppointmentVerification;
 use App\Entity\Availability;
+use App\Entity\Blocage;
 use App\Entity\Consultation;
 use App\Repository\AppointmentRepository;
 use App\Repository\AppointmentVerificationRepository;
 use App\Repository\AvailabilityRepository;
+use App\Repository\BlocageRepository;
 
 class SlotGeneratorService
 {
@@ -16,6 +18,7 @@ class SlotGeneratorService
         private readonly AvailabilityRepository $availabilityRepository,
         private readonly AppointmentRepository $appointmentRepository,
         private readonly AppointmentVerificationRepository $appointmentVerificationRepository,
+        private readonly BlocageRepository $blocageRepository,
     ) {
     }
 
@@ -42,6 +45,7 @@ class SlotGeneratorService
         $punctualAvailabilities = $this->availabilityRepository->findActivePunctualBetween($start, $end);
         $existingAppointments = $this->appointmentRepository->findActiveBetween($start, $end);
         $pendingVerifications = $this->appointmentVerificationRepository->findActiveBetween($start, $end);
+        $blocages = $this->blocageRepository->findOverlapping($start, $end);
 
         if ($excludeVerificationId !== null) {
             $pendingVerifications = array_filter(
@@ -74,8 +78,17 @@ class SlotGeneratorService
                 }
             }
 
+            $blocagesForDay = $this->buildBlocageWindowsForDay($currentDay, $blocages);
+
             foreach ($windowsForDay as $window) {
-                $slot = $this->buildSlotFromWindow($window['start'], $window['end'], $existingAppointments, $pendingVerifications, $now);
+                $slot = $this->buildSlotFromWindow(
+                    $window['start'],
+                    $window['end'],
+                    $existingAppointments,
+                    $pendingVerifications,
+                    $blocagesForDay,
+                    $now
+                );
 
                 if ($slot !== null) {
                     $slots[] = $slot;
@@ -102,11 +115,53 @@ class SlotGeneratorService
     }
 
     /**
+     * Construit, pour un jour donné, la liste des plages horaires bloquées par des Blocage
+     * qui couvrent ce jour (journée entière ou plage horaire précise).
+     *
+     * @param Blocage[] $blocages
+     *
+     * @return array<int, array{start: \DateTimeImmutable, end: \DateTimeImmutable}>
+     */
+    private function buildBlocageWindowsForDay(\DateTimeImmutable $day, array $blocages): array
+    {
+        $windows = [];
+
+        foreach ($blocages as $blocage) {
+            $blocageStart = \DateTimeImmutable::createFromInterface($blocage->getStartDate())->setTime(0, 0);
+            $blocageEnd = \DateTimeImmutable::createFromInterface($blocage->getEndDate())->setTime(0, 0);
+
+            if ($day < $blocageStart || $day > $blocageEnd) {
+                continue;
+            }
+
+            if ($blocage->isFullDay()) {
+                $windows[] = [
+                    'start' => $day->setTime(0, 0),
+                    'end' => $day->modify('+1 day')->setTime(0, 0),
+                ];
+
+                continue;
+            }
+
+            $startTime = $blocage->getStartTime();
+            $endTime = $blocage->getEndTime();
+
+            $windows[] = [
+                'start' => $day->setTime((int) $startTime->format('H'), (int) $startTime->format('i')),
+                'end' => $day->setTime((int) $endTime->format('H'), (int) $endTime->format('i')),
+            ];
+        }
+
+        return $windows;
+    }
+
+    /**
      * Transforme une fenêtre de disponibilité (ex: 17h-18h définie en admin) en un
      * unique créneau réservable en un bloc, sans découpage automatique par durée.
      *
      * @param Appointment[] $existingAppointments
      * @param AppointmentVerification[] $pendingVerifications
+     * @param array<int, array{start: \DateTimeImmutable, end: \DateTimeImmutable}> $blocageWindows
      *
      * @return array{start: \DateTimeImmutable, end: \DateTimeImmutable}|null
      */
@@ -115,11 +170,13 @@ class SlotGeneratorService
         \DateTimeImmutable $windowEnd,
         array $existingAppointments,
         array $pendingVerifications,
+        array $blocageWindows,
         \DateTimeImmutable $now
     ): ?array {
         if ($windowStart <= $now
             || $this->isSlotTaken($windowStart, $windowEnd, $existingAppointments)
             || $this->isSlotPendingVerification($windowStart, $windowEnd, $pendingVerifications)
+            || $this->isSlotBlocked($windowStart, $windowEnd, $blocageWindows)
         ) {
             return null;
         }
@@ -154,6 +211,20 @@ class SlotGeneratorService
             $verificationEnd = \DateTimeImmutable::createFromInterface($verification->getEndAt());
 
             if ($slotStart < $verificationEnd && $slotEnd > $verificationStart) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param array<int, array{start: \DateTimeImmutable, end: \DateTimeImmutable}> $blocageWindows
+     */
+    private function isSlotBlocked(\DateTimeImmutable $slotStart, \DateTimeImmutable $slotEnd, array $blocageWindows): bool
+    {
+        foreach ($blocageWindows as $window) {
+            if ($slotStart < $window['end'] && $slotEnd > $window['start']) {
                 return true;
             }
         }

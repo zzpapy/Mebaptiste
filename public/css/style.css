@@ -105,6 +105,36 @@ main a {
     color: var(--navy);
 }
 
+.article-content {
+    overflow: hidden;
+}
+
+.article-content img {
+    display: inline-block;
+    max-width: 300px;
+    height: auto;
+    border-radius: 6px;
+    margin: 0 20px 16px 0;
+    float: left;
+}
+
+.article-content figure {
+    margin: 0 20px 16px 0;
+    float: left;
+    max-width: 300px;
+}
+
+.article-content figure img {
+    margin: 0;
+    max-width: 100%;
+}
+
+.article-content figcaption {
+    font-size: 0.8rem;
+    color: var(--gray-text);
+    margin-top: 4px;
+}
+
 footer.site-footer {
     background-color: var(--navy-dark);
     color: #aab1c2;
