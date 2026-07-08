@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Annulation de rendez-vous{% endblock %}
+
+{% block body %}
+<section class="cancel-page">
+    {% if state == 'confirm' %}
+        <h1>Annuler votre rendez-vous</h1>
+        <p>
+            Vous êtes sur le point d'annuler votre rendez-vous pour
+            <strong>{{ appointment.consultation.name }}</strong>,
+            le <strong>{{ appointment.startAt|date('d/m/Y') }}</strong>
+            à <strong>{{ appointment.startAt|date('H:i') }}</strong>.
+        </p>
+        <form method="post">
+            <button type="submit" class="cancel-confirm-btn">Confirmer l'annulation</button>
+        </form>
+    {% elseif state == 'success' %}
+        <h1>Rendez-vous annulé</h1>
+        <p>Votre rendez-vous a bien été annulé. Le créneau est de nouveau disponible à la réservation.</p>
+        <p><a href="{{ path('booking_index') }}">Reprendre un nouveau rendez-vous</a></p>
+    {% elseif state == 'already_cancelled' %}
+        <h1>Rendez-vous déjà annulé</h1>
+        <p>Ce rendez-vous a déjà été annulé.</p>
+        <p><a href="{{ path('booking_index') }}">Prendre un nouveau rendez-vous</a></p>
+    {% else %}
+        <h1>Erreur</h1>
+        <p>{{ errorMessage }}</p>
+    {% endif %}
+</section>
+
+<style>
+    .cancel-page {
+        max-width: 480px;
+        margin: 60px auto;
+        padding: 24px;
+        text-align: center;
+    }
+    .cancel-confirm-btn {
+        background: #b03030;
+        color: #fff;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 15px;
+        margin-top: 16px;
+    }
+</style>
+{% endblock %}

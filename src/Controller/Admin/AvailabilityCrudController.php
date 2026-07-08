@@ -9,7 +9,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TimeField;
 
 class AvailabilityCrudController extends AbstractCrudController
@@ -35,9 +34,17 @@ class AvailabilityCrudController extends AbstractCrudController
                 'Récurrente' => Availability::TYPE_RECURRING,
                 'Ponctuelle' => Availability::TYPE_PUNCTUAL,
             ]);
-        yield IntegerField::new('dayOfWeek', 'Jour de la semaine (1=lundi...7=dimanche)')
-            ->setHelp('Uniquement pour une disponibilité récurrente')
-            ->hideOnIndex();
+        yield ChoiceField::new('dayOfWeek', 'Jour')
+            ->setChoices([
+                'Lundi' => 1,
+                'Mardi' => 2,
+                'Mercredi' => 3,
+                'Jeudi' => 4,
+                'Vendredi' => 5,
+                'Samedi' => 6,
+                'Dimanche' => 7,
+            ])
+            ->setHelp('Uniquement pour une disponibilité récurrente');
         yield DateField::new('date', 'Date')
             ->setHelp('Uniquement pour une disponibilité ponctuelle')
             ->hideOnIndex();

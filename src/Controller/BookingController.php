@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Appointment;
 use App\Entity\AppointmentVerification;
+use App\Repository\AppointmentRepository;
 use App\Repository\AppointmentVerificationRepository;
 use App\Repository\ConsultationRepository;
 use App\Service\AppointmentConfirmationMailer;
@@ -22,6 +23,7 @@ class BookingController extends AbstractController
     public function __construct(
         private readonly ConsultationRepository $consultationRepository,
         private readonly ConsultationResolver $consultationResolver,
+        private readonly AppointmentRepository $appointmentRepository,
         private readonly AppointmentVerificationRepository $verificationRepository,
         private readonly SlotGeneratorService $slotGeneratorService,
         private readonly VerificationCodeMailer $verificationCodeMailer,
@@ -41,6 +43,11 @@ class BookingController extends AbstractController
         $truncated = substr($value, 0, 19);
 
         return new \DateTimeImmutable($truncated);
+    }
+
+    private function generateCancelToken(): string
+    {
+        return bin2hex(random_bytes(32));
     }
 
     #[Route('/rendez-vous', name: 'booking_index', methods: ['GET'])]
@@ -214,6 +221,7 @@ class BookingController extends AbstractController
         $appointment->setClientPhone($verification->getClientPhone());
         $appointment->setMessage($verification->getMessage());
         $appointment->setStatus(Appointment::STATUS_PENDING);
+        $appointment->setCancelToken($this->generateCancelToken());
         $appointment->setCreatedAt(new \DateTime());
 
         $this->entityManager->persist($appointment);
@@ -224,5 +232,49 @@ class BookingController extends AbstractController
         $this->appointmentConfirmationMailer->sendToLawyer($appointment);
 
         return new JsonResponse(['success' => true]);
+    }
+
+    #[Route('/rendez-vous/annuler/{token}', name: 'booking_cancel', methods: ['GET', 'POST'])]
+    public function cancel(string $token, Request $request): Response
+    {
+        $appointment = $this->appointmentRepository->findByCancelToken($token);
+
+        if (!$appointment) {
+            return $this->render('booking/cancel.html.twig', [
+                'state' => 'error',
+                'errorMessage' => 'Ce lien d\'annulation est invalide.',
+            ]);
+        }
+
+        if ($appointment->getStatus() === Appointment::STATUS_CANCELLED) {
+            return $this->render('booking/cancel.html.twig', [
+                'state' => 'already_cancelled',
+                'appointment' => $appointment,
+            ]);
+        }
+
+        if ($appointment->getStartAt() < new \DateTime()) {
+            return $this->render('booking/cancel.html.twig', [
+                'state' => 'error',
+                'errorMessage' => 'Ce rendez-vous est déjà passé, il ne peut plus être annulé.',
+            ]);
+        }
+
+        if ($request->isMethod('POST')) {
+            $appointment->setStatus(Appointment::STATUS_CANCELLED);
+            $this->entityManager->flush();
+
+            $this->appointmentConfirmationMailer->sendCancellationToLawyer($appointment);
+
+            return $this->render('booking/cancel.html.twig', [
+                'state' => 'success',
+                'appointment' => $appointment,
+            ]);
+        }
+
+        return $this->render('booking/cancel.html.twig', [
+            'state' => 'confirm',
+            'appointment' => $appointment,
+        ]);
     }
 }

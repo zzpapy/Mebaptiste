@@ -52,4 +52,13 @@ class AppointmentRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    public function findByCancelToken(string $token): ?Appointment
+    {
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.cancelToken = :token')
+            ->setParameter('token', $token)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
