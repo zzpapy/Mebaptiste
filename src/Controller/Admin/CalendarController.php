@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Repository\AppointmentRepository;
+use App\Repository\AvailabilityRepository;
 use App\Repository\BlocageRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,6 +19,7 @@ class CalendarController extends AbstractController
     public function __construct(
         private readonly AppointmentRepository $appointmentRepository,
         private readonly BlocageRepository $blocageRepository,
+        private readonly AvailabilityRepository $availabilityRepository,
     ) {
     }
 
@@ -38,6 +40,8 @@ class CalendarController extends AbstractController
 
         $appointments = $this->appointmentRepository->findActiveBetween($startDate, $endDate);
         $blocages = $this->blocageRepository->findOverlapping($startDate, $endDate);
+        $recurringAvailabilities = $this->availabilityRepository->findActiveRecurring();
+        $punctualAvailabilities = $this->availabilityRepository->findActivePunctualBetween($startDate, $endDate);
 
         $events = [];
         foreach ($appointments as $appointment) {
@@ -101,6 +105,46 @@ class CalendarController extends AbstractController
 
                 $currentDay = $currentDay->modify('+1 day');
             }
+        }
+
+        $currentDay = \DateTimeImmutable::createFromInterface($startDate)->setTime(0, 0);
+        $lastDay = \DateTimeImmutable::createFromInterface($endDate)->setTime(0, 0);
+
+        while ($currentDay <= $lastDay) {
+            $dayOfWeek = (int) $currentDay->format('N');
+
+            foreach ($recurringAvailabilities as $availability) {
+                if ($availability->getDayOfWeek() === $dayOfWeek) {
+                    $startTime = $availability->getStartTime();
+                    $endTime = $availability->getEndTime();
+
+                    $events[] = [
+                        'title' => 'Disponibilité',
+                        'start' => $currentDay->setTime((int) $startTime->format('H'), (int) $startTime->format('i'))->format('c'),
+                        'end' => $currentDay->setTime((int) $endTime->format('H'), (int) $endTime->format('i'))->format('c'),
+                        'color' => '#4a9d5f',
+                        'display' => 'block',
+                    ];
+                }
+            }
+
+            foreach ($punctualAvailabilities as $availability) {
+                $availabilityDate = $availability->getDate();
+                if ($availabilityDate !== null && $availabilityDate->format('Y-m-d') === $currentDay->format('Y-m-d')) {
+                    $startTime = $availability->getStartTime();
+                    $endTime = $availability->getEndTime();
+
+                    $events[] = [
+                        'title' => 'Disponibilité',
+                        'start' => $currentDay->setTime((int) $startTime->format('H'), (int) $startTime->format('i'))->format('c'),
+                        'end' => $currentDay->setTime((int) $endTime->format('H'), (int) $endTime->format('i'))->format('c'),
+                        'color' => '#4a9d5f',
+                        'display' => 'block',
+                    ];
+                }
+            }
+
+            $currentDay = $currentDay->modify('+1 day');
         }
 
         return new JsonResponse($events);

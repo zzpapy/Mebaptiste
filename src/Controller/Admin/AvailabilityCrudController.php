@@ -3,6 +3,8 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Availability;
+use App\Repository\AvailabilityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
@@ -10,9 +12,17 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TimeField;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class AvailabilityCrudController extends AbstractCrudController
 {
+    public function __construct(
+        private readonly AvailabilityRepository $availabilityRepository,
+        private readonly RequestStack $requestStack,
+    ) {
+    }
+
     public static function getEntityFqcn(): string
     {
         return Availability::class;
@@ -53,5 +63,38 @@ class AvailabilityCrudController extends AbstractCrudController
         yield TimeField::new('endTime', 'Heure de fin')
             ->setFormat('HH:mm');
         yield BooleanField::new('isActive', 'Actif');
+    }
+
+    private function assertNoOverlap(Availability $availability): void
+    {
+        $excludeId = $availability->getId();
+
+        $overlapping = $this->availabilityRepository->findOverlapping($availability, $excludeId);
+
+        if (count($overlapping) > 0) {
+            $request = $this->requestStack->getCurrentRequest();
+            $request?->getSession()->getFlashBag()->add(
+                'danger',
+                'Cette disponibilité chevauche une disponibilité existante pour ce même jour/horaire.'
+            );
+
+            throw new \Symfony\Component\Form\Exception\TransformationFailedException(
+                'Cette disponibilité chevauche une disponibilité existante pour ce même jour/horaire.'
+            );
+        }
+    }
+
+    public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        $this->assertNoOverlap($entityInstance);
+
+        parent::persistEntity($entityManager, $entityInstance);
+    }
+
+    public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        $this->assertNoOverlap($entityInstance);
+
+        parent::updateEntity($entityManager, $entityInstance);
     }
 }
