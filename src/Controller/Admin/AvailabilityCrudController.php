@@ -12,7 +12,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TimeField;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class AvailabilityCrudController extends AbstractCrudController
@@ -65,35 +64,31 @@ class AvailabilityCrudController extends AbstractCrudController
         yield BooleanField::new('isActive', 'Actif');
     }
 
-    private function assertNoOverlap(Availability $availability): void
+    private function hasOverlap(Availability $availability): bool
     {
-        $excludeId = $availability->getId();
+        $overlapping = $this->availabilityRepository->findOverlapping($availability, $availability->getId());
 
-        $overlapping = $this->availabilityRepository->findOverlapping($availability, $excludeId);
-
-        if (count($overlapping) > 0) {
-            $request = $this->requestStack->getCurrentRequest();
-            $request?->getSession()->getFlashBag()->add(
-                'danger',
-                'Cette disponibilité chevauche une disponibilité existante pour ce même jour/horaire.'
-            );
-
-            throw new \Symfony\Component\Form\Exception\TransformationFailedException(
-                'Cette disponibilité chevauche une disponibilité existante pour ce même jour/horaire.'
-            );
-        }
+        return count($overlapping) > 0;
     }
 
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
-        $this->assertNoOverlap($entityInstance);
+        if ($this->hasOverlap($entityInstance)) {
+            $this->addFlash('danger', 'Cette disponibilité chevauche une disponibilité existante pour ce même jour/horaire.');
+
+            return;
+        }
 
         parent::persistEntity($entityManager, $entityInstance);
     }
 
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
-        $this->assertNoOverlap($entityInstance);
+        if ($this->hasOverlap($entityInstance)) {
+            $this->addFlash('danger', 'Cette disponibilité chevauche une disponibilité existante pour ce même jour/horaire.');
+
+            return;
+        }
 
         parent::updateEntity($entityManager, $entityInstance);
     }
