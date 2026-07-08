@@ -27,4 +27,29 @@ class AppointmentRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Retourne les rendez-vous actifs (non annulés) qui chevauchent la plage donnée,
+     * en excluant éventuellement un rendez-vous précis (utile lors d'une modification
+     * pour ne pas se bloquer soi-même).
+     *
+     * @return Appointment[]
+     */
+    public function findOverlapping(\DateTimeInterface $start, \DateTimeInterface $end, ?int $excludeId = null): array
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->andWhere('a.status != :cancelled')
+            ->andWhere('a.startAt < :end')
+            ->andWhere('a.endAt > :start')
+            ->setParameter('cancelled', Appointment::STATUS_CANCELLED)
+            ->setParameter('start', $start)
+            ->setParameter('end', $end);
+
+        if ($excludeId !== null) {
+            $qb->andWhere('a.id != :excludeId')
+                ->setParameter('excludeId', $excludeId);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }
