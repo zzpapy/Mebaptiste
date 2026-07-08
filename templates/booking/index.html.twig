@@ -43,7 +43,7 @@
                 <input type="email" id="booking-email" required>
 
                 <label for="booking-phone">Téléphone</label>
-                <input type="tel" id="booking-phone">
+                <input type="tel" id="booking-phone" maxlength="20">
 
                 <label for="booking-message">Message (facultatif)</label>
                 <textarea id="booking-message"></textarea>
@@ -97,10 +97,9 @@
         top: 12px;
         right: 16px;
         background: none;
-        border: none;
-        font-size: 24px;
-        cursor: pointer;
         color: #666;
+        font-size: 24px;
+        padding: 0;
     }
     .booking-modal form label {
         display: block;

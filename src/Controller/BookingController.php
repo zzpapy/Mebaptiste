@@ -145,6 +145,10 @@ class BookingController extends AbstractController
             return new JsonResponse(['error' => 'Coordonnées invalides'], 400);
         }
 
+        if ($phone !== '' && strlen($phone) > 20) {
+            return new JsonResponse(['error' => 'Le numéro de téléphone est trop long.'], 400);
+        }
+
         if (!$start || !$end) {
             return new JsonResponse(['error' => 'Créneau invalide'], 400);
         }
