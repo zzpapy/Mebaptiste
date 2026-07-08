@@ -6,6 +6,8 @@ use App\Entity\Appointment;
 use App\Entity\AppointmentVerification;
 use App\Repository\AppointmentVerificationRepository;
 use App\Repository\ConsultationRepository;
+use App\Service\AppointmentConfirmationMailer;
+use App\Service\ConsultationResolver;
 use App\Service\SlotGeneratorService;
 use App\Service\VerificationCodeMailer;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,9 +21,11 @@ class BookingController extends AbstractController
 {
     public function __construct(
         private readonly ConsultationRepository $consultationRepository,
+        private readonly ConsultationResolver $consultationResolver,
         private readonly AppointmentVerificationRepository $verificationRepository,
         private readonly SlotGeneratorService $slotGeneratorService,
         private readonly VerificationCodeMailer $verificationCodeMailer,
+        private readonly AppointmentConfirmationMailer $appointmentConfirmationMailer,
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -50,24 +54,17 @@ class BookingController extends AbstractController
     #[Route('/rendez-vous/creneaux', name: 'booking_slots', methods: ['GET'])]
     public function slots(Request $request): JsonResponse
     {
-        $consultationId = $request->query->get('consultationId');
         $start = $request->query->get('start');
         $end = $request->query->get('end');
 
-        if (!$consultationId || !$start || !$end) {
+        if (!$start || !$end) {
             return new JsonResponse(['error' => 'Paramètres manquants'], 400);
-        }
-
-        $consultation = $this->consultationRepository->find($consultationId);
-
-        if (!$consultation || !$consultation->isActive()) {
-            return new JsonResponse(['error' => 'Type de consultation invalide'], 404);
         }
 
         $startDate = $this->parseNaiveDateTime($start);
         $endDate = $this->parseNaiveDateTime($end);
 
-        $slots = $this->slotGeneratorService->getAvailableSlots($consultation, $startDate, $endDate);
+        $slots = $this->slotGeneratorService->getAvailableSlots(null, $startDate, $endDate);
 
         $events = array_map(static fn (array $slot) => [
             'start' => $slot['start']->format('Y-m-d\TH:i:s'),
@@ -82,7 +79,7 @@ class BookingController extends AbstractController
     #[Route('/rendez-vous/demarrer', name: 'booking_start', methods: ['POST'])]
     public function start(Request $request): JsonResponse
     {
-        $consultationId = $request->request->get('consultationId');
+        $consultationName = trim((string) $request->request->get('consultationName'));
         $start = $request->request->get('start');
         $end = $request->request->get('end');
         $firstName = trim((string) $request->request->get('firstName'));
@@ -91,10 +88,8 @@ class BookingController extends AbstractController
         $phone = trim((string) $request->request->get('phone'));
         $message = trim((string) $request->request->get('message'));
 
-        $consultation = $this->consultationRepository->find($consultationId);
-
-        if (!$consultation || !$consultation->isActive()) {
-            return new JsonResponse(['error' => 'Type de consultation invalide'], 404);
+        if ($consultationName === '') {
+            return new JsonResponse(['error' => 'Merci d\'indiquer le type de consultation.'], 400);
         }
 
         if ($firstName === '' || $lastName === '' || $email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -108,7 +103,7 @@ class BookingController extends AbstractController
         $startDate = $this->parseNaiveDateTime($start);
         $endDate = $this->parseNaiveDateTime($end);
 
-        $availableSlots = $this->slotGeneratorService->getAvailableSlots($consultation, $startDate, $endDate);
+        $availableSlots = $this->slotGeneratorService->getAvailableSlots(null, $startDate, $endDate);
         $slotStillAvailable = false;
         foreach ($availableSlots as $slot) {
             if ($slot['start'] == $startDate && $slot['end'] == $endDate) {
@@ -120,6 +115,8 @@ class BookingController extends AbstractController
         if (!$slotStillAvailable) {
             return new JsonResponse(['error' => 'Ce créneau n\'est plus disponible'], 409);
         }
+
+        $consultation = $this->consultationResolver->resolveOrCreate($consultationName);
 
         $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
@@ -187,7 +184,7 @@ class BookingController extends AbstractController
         // On exclut la vérification en cours de validation elle-même, sinon elle se
         // bloque systématiquement en se détectant comme "créneau en attente".
         $availableSlots = $this->slotGeneratorService->getAvailableSlots(
-            $consultation,
+            null,
             $startDate,
             $endDate,
             $verification->getId()
@@ -222,6 +219,9 @@ class BookingController extends AbstractController
         $this->entityManager->persist($appointment);
         $this->entityManager->remove($verification);
         $this->entityManager->flush();
+
+        $this->appointmentConfirmationMailer->sendToClient($appointment);
+        $this->appointmentConfirmationMailer->sendToLawyer($appointment);
 
         return new JsonResponse(['success' => true]);
     }

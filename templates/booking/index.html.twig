@@ -7,15 +7,13 @@
     <h1>Prendre rendez-vous</h1>
 
     <div class="booking-step" id="booking-step-consultation">
-        <label for="consultation-select">Type de consultation</label>
-        <select id="consultation-select">
-            <option value="">-- Choisissez --</option>
+        <label for="consultation-input">Type de consultation</label>
+        <input type="text" id="consultation-input" list="consultation-list" placeholder="Ex : divorce, succession...">
+        <datalist id="consultation-list">
             {% for consultation in consultations %}
-                <option value="{{ consultation.id }}" data-duration="{{ consultation.durationMinutes }}">
-                    {{ consultation.name }} ({{ consultation.durationMinutes }} min)
-                </option>
+                <option value="{{ consultation.name }}">
             {% endfor %}
-        </select>
+        </datalist>
     </div>
 
     <div class="booking-step" id="booking-step-calendar" style="display:none;">

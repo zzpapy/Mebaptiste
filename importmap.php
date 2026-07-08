@@ -24,6 +24,10 @@ return [
         'path' => './assets/booking.js',
         'entrypoint' => true,
     ],
+    'appointment_consultation_autocomplete' => [
+        'path' => './assets/appointment_consultation_autocomplete.js',
+        'entrypoint' => true,
+    ],
     '@fullcalendar/core/index.js' => [
         'version' => '6.1.21',
     ],

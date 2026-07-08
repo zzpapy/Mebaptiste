@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const consultationSelect = document.getElementById('consultation-select');
+    const consultationInput = document.getElementById('consultation-input');
 
-    if (!consultationSelect) {
+    if (!consultationInput) {
         return;
     }
 
@@ -59,11 +59,11 @@ document.addEventListener('DOMContentLoaded', function () {
         return isoString.substring(0, 19);
     }
 
-    function initCalendarForConsultation(consultationId) {
+    function initCalendarForConsultation(consultationName) {
         stepSuccess.style.display = 'none';
         closeModal();
 
-        if (!consultationId) {
+        if (!consultationName) {
             stepCalendar.style.display = 'none';
             return;
         }
@@ -89,8 +89,7 @@ document.addEventListener('DOMContentLoaded', function () {
             selectable: false,
             events: function (info, successCallback, failureCallback) {
                 const url = '/rendez-vous/creneaux'
-                    + '?consultationId=' + encodeURIComponent(consultationId)
-                    + '&start=' + encodeURIComponent(stripTimezone(info.startStr))
+                    + '?start=' + encodeURIComponent(stripTimezone(info.startStr))
                     + '&end=' + encodeURIComponent(stripTimezone(info.endStr));
 
                 fetch(url)
@@ -100,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             eventClick: function (info) {
                 selectedSlot = {
-                    consultationId: consultationId,
+                    consultationName: consultationName,
                     start: stripTimezone(info.event.startStr),
                     end: stripTimezone(info.event.endStr),
                 };
@@ -118,15 +117,13 @@ document.addEventListener('DOMContentLoaded', function () {
         calendar.render();
     }
 
-    consultationSelect.addEventListener('change', function () {
-        initCalendarForConsultation(consultationSelect.value);
+    consultationInput.addEventListener('change', function () {
+        initCalendarForConsultation(consultationInput.value.trim());
     });
 
-    // Initialisation immédiate si une consultation est déjà pré-sélectionnée
-    // au chargement de la page (cas d'un select à option unique, qui ne
-    // déclenche pas d'événement "change" tant que la valeur ne change pas).
-    if (consultationSelect.value) {
-        initCalendarForConsultation(consultationSelect.value);
+    // Initialisation immédiate si un type est déjà pré-rempli au chargement de la page.
+    if (consultationInput.value.trim()) {
+        initCalendarForConsultation(consultationInput.value.trim());
     }
 
     bookingForm.addEventListener('submit', function (event) {
@@ -139,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const formData = new FormData();
-        formData.append('consultationId', selectedSlot.consultationId);
+        formData.append('consultationName', selectedSlot.consultationName);
         formData.append('start', selectedSlot.start);
         formData.append('end', selectedSlot.end);
         formData.append('firstName', document.getElementById('booking-firstName').value);

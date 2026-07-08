@@ -20,7 +20,10 @@ class SlotGeneratorService
     }
 
     /**
-     * Génère les créneaux disponibles pour un type de consultation, entre deux dates.
+     * Génère les créneaux disponibles entre deux dates. Le type de consultation
+     * n'a plus d'influence sur le calcul (c'est la disponibilité définie par
+     * l'admin qui fixe la durée du créneau), il est conservé en paramètre
+     * uniquement pour compatibilité, et peut être omis.
      *
      * @param int|null $excludeVerificationId Identifiant d'une AppointmentVerification à exclure
      *                                         du calcul (utilisé lors de la revérification finale
@@ -30,7 +33,7 @@ class SlotGeneratorService
      * @return array<int, array{start: \DateTimeImmutable, end: \DateTimeImmutable}>
      */
     public function getAvailableSlots(
-        Consultation $consultation,
+        ?Consultation $consultation,
         \DateTimeInterface $start,
         \DateTimeInterface $end,
         ?int $excludeVerificationId = null

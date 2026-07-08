@@ -21,6 +21,22 @@ class Appointment
     #[ORM\JoinColumn(nullable: false)]
     private ?Consultation $consultation = null;
 
+    /**
+     * Propriété virtuelle (non persistée) utilisée uniquement par le formulaire admin
+     * pour saisir le type de consultation en texte libre. Résolue en une véritable
+     * Consultation (existante ou nouvellement créée) dans AppointmentCrudController.
+     */
+    private ?string $consultationName = null;
+
+    /**
+     * Propriétés virtuelles (non persistées) utilisées uniquement par le formulaire
+     * admin, pour saisir une date unique + heure de début/fin (le rendez-vous se
+     * termine toujours le même jour). Combinées en startAt/endAt dans le contrôleur.
+     */
+    private ?\DateTimeInterface $appointmentDate = null;
+    private ?\DateTimeInterface $startTimeOnly = null;
+    private ?\DateTimeInterface $endTimeOnly = null;
+
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $startAt = null;
 
@@ -61,6 +77,54 @@ class Appointment
     public function setConsultation(?Consultation $consultation): static
     {
         $this->consultation = $consultation;
+
+        return $this;
+    }
+
+    public function getConsultationName(): ?string
+    {
+        return $this->consultationName ?? $this->consultation?->getName();
+    }
+
+    public function setConsultationName(?string $consultationName): static
+    {
+        $this->consultationName = $consultationName;
+
+        return $this;
+    }
+
+    public function getAppointmentDate(): ?\DateTimeInterface
+    {
+        return $this->appointmentDate ?? $this->startAt;
+    }
+
+    public function setAppointmentDate(?\DateTimeInterface $appointmentDate): static
+    {
+        $this->appointmentDate = $appointmentDate;
+
+        return $this;
+    }
+
+    public function getStartTimeOnly(): ?\DateTimeInterface
+    {
+        return $this->startTimeOnly ?? $this->startAt;
+    }
+
+    public function setStartTimeOnly(?\DateTimeInterface $startTimeOnly): static
+    {
+        $this->startTimeOnly = $startTimeOnly;
+
+        return $this;
+    }
+
+    public function getEndTimeOnly(): ?\DateTimeInterface
+    {
+        return $this->endTimeOnly ?? $this->endAt;
+    }
+
+    public function setEndTimeOnly(?\DateTimeInterface $endTimeOnly): static
+    {
+        $this->endTimeOnly = $endTimeOnly;
 
         return $this;
     }
