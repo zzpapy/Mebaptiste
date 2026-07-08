@@ -2,6 +2,16 @@
 
 {% block title %}{{ page.title }}{% endblock %}
 
+{% block meta_description %}{{ page.metaDescription ?? parent() }}{% endblock %}
+
+{% block og_image %}
+    {%- if page.featuredImage -%}
+        {{ absolute_url(asset('uploads/pages/' ~ page.featuredImage)) }}
+    {%- else -%}
+        {{ parent() }}
+    {%- endif -%}
+{% endblock %}
+
 {% block body %}
     <h1>{{ page.title }}</h1>
 

@@ -2,6 +2,18 @@
 
 {% block title %}{{ article.title }}{% endblock %}
 
+{% block meta_description %}{{ article.metaDescription ?? article.excerpt ?? parent() }}{% endblock %}
+
+{% block og_type %}article{% endblock %}
+
+{% block og_image %}
+    {%- if article.featuredImage -%}
+        {{ absolute_url(asset('uploads/articles/' ~ article.featuredImage)) }}
+    {%- else -%}
+        {{ parent() }}
+    {%- endif -%}
+{% endblock %}
+
 {% block body %}
     <h1>{{ article.title }}</h1>
 

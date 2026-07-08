@@ -4,8 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Maître Baptiste Lebrou{% endblock %} - Avocat à Strasbourg</title>
+
+    <meta name="description" content="{% block meta_description %}Maître Baptiste Lebrou, avocat au barreau de Strasbourg. Conseil et défense en droit pénal. Prise de rendez-vous en ligne.{% endblock %}">
+    <link rel="canonical" href="{% block canonical_url %}{{ url(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}{% endblock %}">
+
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}{{ block('title') }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ block('meta_description') }}{% endblock %}">
+    <meta property="og:url" content="{{ block('canonical_url') }}">
+    <meta property="og:image" content="{% block og_image %}{{ absolute_url(asset('favicon.svg')) }}{% endblock %}">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:site_name" content="Baptiste Lebrou - Avocat au barreau de Strasbourg">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ block('og_title') }}">
+    <meta name="twitter:description" content="{{ block('og_description') }}">
+    <meta name="twitter:image" content="{{ block('og_image') }}">
+
     <link rel="stylesheet" href="/css/style.css">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+    {% block schema_org %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Attorney",
+        "name": "Maître Baptiste Lebrou",
+        "description": "Avocat au barreau de Strasbourg, conseil et défense en droit pénal.",
+        "url": "{{ url('home') }}",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Strasbourg",
+            "addressCountry": "FR"
+        },
+        "areaServed": "Strasbourg"
+    }
+    </script>
+    {% endblock %}
 </head>
 <body>
     <header class="site-header">
