@@ -50,6 +50,17 @@ class AppointmentConfirmationMailer
         $this->mailer->send($email);
     }
 
+    public function sendReminder(Appointment $appointment): void
+    {
+        $email = (new Email())
+            ->from('noreply@lebrou-avocat.fr')
+            ->to($appointment->getClientEmail())
+            ->subject('Rappel de votre rendez-vous demain')
+            ->html($this->buildReminderHtml($appointment));
+
+        $this->mailer->send($email);
+    }
+
     private function buildCancelUrl(Appointment $appointment): string
     {
         return $this->urlGenerator->generate(
@@ -126,6 +137,32 @@ class AppointmentConfirmationMailer
                 <p>Le <strong>{$start}</strong> à <strong>{$end}</strong></p>
                 <p style="margin-top: 16px; font-size: 13px; color: #666;">
                     Ce créneau est de nouveau disponible à la réservation.
+                </p>
+            </div>
+        HTML;
+    }
+
+    private function buildReminderHtml(Appointment $appointment): string
+    {
+        $consultationName = htmlspecialchars($appointment->getConsultation()?->getName() ?? '');
+        $start = $appointment->getStartAt()->format('d/m/Y H:i');
+        $end = $appointment->getEndAt()->format('H:i');
+        $firstName = htmlspecialchars($appointment->getClientFirstName());
+        $cancelUrl = $this->buildCancelUrl($appointment);
+
+        return <<<HTML
+            <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+                <h2 style="color: #1a3a5c;">Rappel de votre rendez-vous</h2>
+                <p>Bonjour {$firstName},</p>
+                <p>Nous vous rappelons votre rendez-vous pour <strong>{$consultationName}</strong> :</p>
+                <p style="background: #f0f0f0; padding: 16px; border-radius: 6px;">
+                    Le <strong>{$start}</strong> à <strong>{$end}</strong>
+                </p>
+                <p style="margin-top: 24px;">
+                    Un empêchement ? <a href="{$cancelUrl}" style="color: #1a3a5c;">Annuler ce rendez-vous</a>
+                </p>
+                <p style="margin-top: 24px; font-size: 13px; color: #666;">
+                    Maître Baptiste Lebrou - Avocat au barreau de Strasbourg
                 </p>
             </div>
         HTML;

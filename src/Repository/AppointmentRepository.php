@@ -79,4 +79,23 @@ class AppointmentRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Retourne les rendez-vous actifs qui débutent dans la plage donnée et n'ont pas
+     * encore reçu de rappel, pour l'envoi d'emails de rappel automatiques.
+     *
+     * @return Appointment[]
+     */
+    public function findNeedingReminder(\DateTimeInterface $from, \DateTimeInterface $to): array
+    {
+        return $this->createQueryBuilder('a')
+            ->andWhere('a.status != :cancelled')
+            ->andWhere('a.startAt BETWEEN :from AND :to')
+            ->andWhere('a.reminderSentAt IS NULL')
+            ->setParameter('cancelled', Appointment::STATUS_CANCELLED)
+            ->setParameter('from', $from)
+            ->setParameter('to', $to)
+            ->getQuery()
+            ->getResult();
+    }
 }

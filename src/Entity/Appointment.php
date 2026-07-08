@@ -64,6 +64,9 @@ class Appointment
     #[ORM\Column(length: 64, unique: true, nullable: true)]
     private ?string $cancelToken = null;
 
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $reminderSentAt = null;
+
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $createdAt = null;
 
@@ -236,6 +239,18 @@ class Appointment
     public function setCancelToken(?string $cancelToken): static
     {
         $this->cancelToken = $cancelToken;
+
+        return $this;
+    }
+
+    public function getReminderSentAt(): ?\DateTimeInterface
+    {
+        return $this->reminderSentAt;
+    }
+
+    public function setReminderSentAt(?\DateTimeInterface $reminderSentAt): static
+    {
+        $this->reminderSentAt = $reminderSentAt;
 
         return $this;
     }
