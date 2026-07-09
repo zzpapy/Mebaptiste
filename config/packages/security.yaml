@@ -9,7 +9,11 @@ security:
         app_user_provider:
             entity:
                 class: App\Entity\User
-                property: email
+                # La ligne "property: email" a été retirée : sa présence forçait
+                # Symfony à faire une recherche exacte (sensible à la casse) et à
+                # ignorer UserRepository::loadUserByIdentifier() (recherche
+                # insensible à la casse, nécessaire car les claviers mobiles
+                # capitalisent parfois automatiquement la première lettre).
 
     firewalls:
         dev:
