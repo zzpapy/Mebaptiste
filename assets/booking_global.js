@@ -23,6 +23,10 @@ document.addEventListener('DOMContentLoaded', function () {
     let selectedSlot = null;
     let verificationId = null;
 
+    function isMobileScreen() {
+        return window.innerWidth < 640;
+    }
+
     function showError(message) {
         errorMessage.textContent = message;
         stepError.style.display = 'block';
@@ -91,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'timeGridWeek',
+            initialView: isMobileScreen() ? 'timeGridDay' : 'timeGridWeek',
             locale: 'fr',
             firstDay: 1,
             allDayText: 'Journée',
@@ -103,6 +107,11 @@ document.addEventListener('DOMContentLoaded', function () {
             slotMinTime: '08:00:00',
             slotMaxTime: '20:00:00',
             selectable: false,
+            windowResize: function (view) {
+                if (isMobileScreen() && calendar.view.type !== 'timeGridDay') {
+                    calendar.changeView('timeGridDay');
+                }
+            },
             events: function (info, successCallback, failureCallback) {
                 const url = '/rendez-vous/creneaux'
                     + '?start=' + encodeURIComponent(stripTimezone(info.startStr))
