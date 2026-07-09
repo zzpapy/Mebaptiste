@@ -47,6 +47,9 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(AvailabilityCrudController::class, 'Disponibilités', 'fas fa-calendar-check')->setAction(Action::INDEX);
         yield MenuItem::linkTo(BlocageCrudController::class, 'Blocages (vacances, absences)', 'fas fa-ban')->setAction(Action::INDEX);
 
+        yield MenuItem::section('Mon compte');
+        yield MenuItem::linkToRoute('Changer mon mot de passe', 'fas fa-key', 'admin_change_password');
+
         yield MenuItem::section('Liens utiles');
         yield MenuItem::linkToRoute('Page publique de réservation', 'fas fa-external-link-alt', 'booking_index')->setLinkTarget('_blank');
     }
