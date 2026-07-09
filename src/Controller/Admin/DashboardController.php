@@ -7,8 +7,10 @@ use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
+use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[AdminDashboard(routePath: '/admin', routeName: 'admin')]
 class DashboardController extends AbstractDashboardController
@@ -32,6 +34,14 @@ class DashboardController extends AbstractDashboardController
             ->setFaviconPath('favicon.svg');
     }
 
+    public function configureUserMenu(UserInterface $user): UserMenu
+    {
+        return parent::configureUserMenu($user)
+            ->addMenuItems([
+                MenuItem::linkToRoute('Changer mon mot de passe', 'fas fa-key', 'admin_change_password'),
+            ]);
+    }
+
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linkToDashboard('Accueil', 'fa fa-home');
@@ -46,9 +56,6 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(ConsultationCrudController::class, 'Types de consultation', 'fas fa-stethoscope')->setAction(Action::INDEX);
         yield MenuItem::linkTo(AvailabilityCrudController::class, 'Disponibilités', 'fas fa-calendar-check')->setAction(Action::INDEX);
         yield MenuItem::linkTo(BlocageCrudController::class, 'Blocages (vacances, absences)', 'fas fa-ban')->setAction(Action::INDEX);
-
-        yield MenuItem::section('Mon compte');
-        yield MenuItem::linkToRoute('Changer mon mot de passe', 'fas fa-key', 'admin_change_password');
 
         yield MenuItem::section('Liens utiles');
         yield MenuItem::linkToRoute('Page publique de réservation', 'fas fa-external-link-alt', 'booking_index')->setLinkTarget('_blank');
