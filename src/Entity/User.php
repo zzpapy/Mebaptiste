@@ -44,7 +44,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setEmail(string $email): static
     {
-        $this->email = $email;
+        // Normalisation en minuscules pour éviter les problèmes de connexion
+        // liés à la casse (ex: clavier mobile qui capitalise automatiquement).
+        $this->email = strtolower(trim($email));
 
         return $this;
     }

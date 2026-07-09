@@ -211,7 +211,231 @@
             <div class="checkbox-row">
                 <input type="checkbox" name="_remember_me" id="remember_me">
                 <label for="remember_me">Se souvenir de moi</label>
+            </div>{# templates/security/login.html.twig #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Connexion - Espace administration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        :root {
+            --navy: #0f1f3d;
+            --navy-light: #16294f;
+            --gold: #c9a24b;
+            --gold-light: #ddc17f;
+            --text-light: #eef1f7;
+            --error-bg: #4a1a1a;
+            --error-text: #f3caca;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(160deg, var(--navy) 0%, var(--navy-light) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(201, 162, 75, 0.35);
+            border-radius: 6px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .login-header .badge {
+            display: inline-block;
+            width: 48px;
+            height: 2px;
+            background: var(--gold);
+            margin-bottom: 18px;
+        }
+
+        .login-header h1 {
+            color: var(--text-light);
+            font-size: 22px;
+            font-weight: normal;
+            letter-spacing: 0.5px;
+            margin: 0 0 6px 0;
+        }
+
+        .login-header p {
+            color: rgba(238, 241, 247, 0.55);
+            font-size: 13px;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: var(--gold-light);
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(201, 162, 75, 0.3);
+            border-radius: 4px;
+            color: var(--text-light);
+            font-size: 15px;
+            font-family: Arial, sans-serif;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: var(--gold);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            font-family: Arial, sans-serif;
+        }
+
+        .checkbox-row input {
+            accent-color: var(--gold);
+        }
+
+        .checkbox-row label {
+            margin: 0;
+            text-transform: none;
+            letter-spacing: normal;
+            font-size: 13px;
+            color: rgba(238, 241, 247, 0.75);
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            background: var(--gold);
+            border: none;
+            border-radius: 4px;
+            color: var(--navy);
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--gold-light);
+        }
+
+        .alert-error {
+            background: var(--error-bg);
+            border: 1px solid rgba(243, 202, 202, 0.3);
+            color: var(--error-text);
+            padding: 12px 14px;
+            border-radius: 4px;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 28px;
+        }
+
+        .back-link a {
+            color: rgba(238, 241, 247, 0.5);
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            text-decoration: none;
+        }
+
+        .back-link a:hover {
+            color: var(--gold-light);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-header">
+            <span class="badge"></span>
+            <h1>Espace administration</h1>
+            <p>Cabinet Baptiste Lebrou — Avocat</p>
+        </div>
+
+        {% if error %}
+            <div class="alert-error">
+                {{ error.messageKey|trans(error.messageData, 'security') }}
             </div>
+        {% endif %}
+
+        <form method="post">
+            <div class="form-group">
+                <label for="username">Adresse e-mail</label>
+                <input type="email" value="{{ last_username }}" name="_username" id="username" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input type="password" name="_password" id="password" autocomplete="current-password" required>
+            </div>
+
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+            <div class="checkbox-row">
+                <input type="checkbox" name="_remember_me" id="remember_me">
+                <label for="remember_me">Se souvenir de moi</label>
+            </div>
+
+            <button type="submit">Se connecter</button>
+        </form>
+
+        <div class="back-link">
+            <a href="{{ path('home') }}">&larr; Retour au site</a>
+        </div>
+    </div>
+</body>
+</html>
+
 
             <button type="submit">Se connecter</button>
         </form>
